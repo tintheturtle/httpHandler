@@ -19,7 +19,7 @@ func printHelp(help bool) {
 		fmt.Println("Options: ")
 		fmt.Println("--help, Provides information on how to use this")
 		fmt.Println("--url, Provide a URL to perform a POST Request")
-		fmt.Println("--profile, Provides the number of times to perform the POST Request \n")
+		fmt.Println("--profile, Provides the number of times to perform the POST Request")
 		return 
 	}
 
@@ -102,8 +102,8 @@ func main() {
 			// Retrieving error codes
 			if strings.Contains(resultArray[i], "200 OK") {
 				successes+= 1
-			} else if (strings.Contains(resultArray[i], "HTTP/1.1") && !strings.Contains(resultArray[i], "200 OK")) {
-				var temp string = strings.Split(resultArray[i], "HTTP/1.1")[1]
+			} else if (strings.Contains(resultArray[i], "HTTP/1") && !strings.Contains(resultArray[i], "HTTP/1.1 20")) {
+				var temp string = strings.Split(resultArray[i], " ")[1]
 				errorCodes = append(errorCodes, strings.TrimSpace(temp))
 			}
 
