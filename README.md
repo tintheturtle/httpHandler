@@ -36,7 +36,7 @@ Uses sockets to directly handle an HTTP POST Request, written in Golang.
 - [Google](https://www.google.com:80)
 ![](./images/google.png)
 
-- [Microsoft](https://azure.microsoft.com:80/en-us/services/cdn/
+- [Microsoft](https://azure.microsoft.com:80/en-us/services/cdn/)
 ![](./images/microsoft.png)
 
 - [Fastly](https://www.fastly.com:80)
