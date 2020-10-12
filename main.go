@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"sort"
+	"strconv"
 	"strings"
 	"time"
 )
@@ -61,6 +62,8 @@ func main() {
 	var median []int64
 	var successes float64 = 0
 	var errorCodes []string
+	var minSize int = 0
+	var maxSize int = 0
 
 	// Send requests however many times specified (default 1)
 	for i := 0; i < *profilePtr; i++ {
@@ -69,7 +72,7 @@ func main() {
 		checkError(err)
 
 		var start = time.Now()
-		_, err = conn.Write([]byte("GET " + endpoint + " HTTP/1.0\r\n" + headers ))
+		_, err = conn.Write([]byte("POST " + endpoint + " HTTP/1.0\r\nHost:" + host + headers ))
 		checkError(err)
 
 		var time int64 = time.Since(start).Nanoseconds()
@@ -88,14 +91,34 @@ func main() {
 		result, err := ioutil.ReadAll(conn)
 		checkError(err)
 
+		fmt.Println(string(result))
+
+		// String processing to get error codes and size
 		var resultArray []string
 		resultArray = strings.Split(strings.TrimSpace(string(result)), "\n")
 		for i := range resultArray { 
+
+			// Retrieving error codes
 			if strings.Contains(resultArray[i], "200 OK") {
 				successes+= 1
 			} else if (strings.Contains(resultArray[i], "HTTP/1.1") && !strings.Contains(resultArray[i], "200 OK")) {
 				var temp string = strings.Split(resultArray[i], "HTTP/1.1")[1]
 				errorCodes = append(errorCodes, strings.TrimSpace(temp))
+			}
+
+			if strings.Contains(resultArray[i], "Content-Length:") {
+				var temp, err = strconv.Atoi(strings.TrimSpace(strings.Split(resultArray[i], "Content-Length:")[1]))
+				checkError(err)
+
+				// Checking for minimum and maximum size responses
+				if temp < minSize || minSize == 0 {
+					minSize = temp
+					fmt.Println(minSize)
+				}
+				if temp > maxSize {
+					maxSize = temp
+					fmt.Println(maxSize)
+				}
 			}
 		}
 	}
@@ -123,6 +146,8 @@ func main() {
 	fmt.Printf("Median Request Time (µs): %d\n", medianValue)
 	fmt.Printf("Percent Successful Requests: %.3f\n", successes / float64(*profilePtr))
 	fmt.Printf("Error Codes: %v\n", errorCodes)
+	fmt.Printf("Size of Largest Response: %d\n", maxSize)
+	fmt.Printf("Size of Smallest Response: %d\n", minSize)
 
     os.Exit(0)
 
