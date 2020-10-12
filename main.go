@@ -13,14 +13,17 @@ import (
 	"time"
 )
 
-func validation(help bool, url string) (int) {
+func printHelp(help bool) {
 
 	if (help == true) {
-		fmt.Println("Hello")
-		return 0
+		fmt.Println("Options: ")
+		fmt.Println("--help, Provides information on how to use this")
+		fmt.Println("--url, Provide a URL to perform a POST Request")
+		fmt.Println("--profile, Provides the number of times to perform the POST Request \n")
+		return 
 	}
 
-	return 1
+	return 
 
 }
 
@@ -38,7 +41,8 @@ func main() {
 	urlPtr := flag.String("url", "", "URL to fetch")
 	profilePtr := flag.Int("profile", 1, "Number of requests to be made")
 	flag.Parse()
-	validation(*helpPtr, *urlPtr)
+	
+	printHelp(*helpPtr)
 
 	// URL String Parsing
 	u, err := url.Parse(*urlPtr)
@@ -86,12 +90,9 @@ func main() {
 		if (max == 0 || time > max) {
 			max = time
 		}
-		
 
 		result, err := ioutil.ReadAll(conn)
 		checkError(err)
-
-		fmt.Println(string(result))
 
 		// String processing to get error codes and size
 		var resultArray []string
@@ -113,11 +114,9 @@ func main() {
 				// Checking for minimum and maximum size responses
 				if temp < minSize || minSize == 0 {
 					minSize = temp
-					fmt.Println(minSize)
 				}
 				if temp > maxSize {
 					maxSize = temp
-					fmt.Println(maxSize)
 				}
 			}
 		}
