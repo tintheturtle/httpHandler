@@ -7,6 +7,7 @@ import (
 	"net"
 	"net/url"
 	"os"
+	"sort"
 	"time"
 )
 
@@ -52,13 +53,14 @@ func main() {
 	// Headers
 	var headers = "\r\nAccept: application/json\r\nConnection: close\r\n\r\n"
 
+	// Profile Variables
 	var min int64 = 0
 	var max int64 = 0
-
 	var mean int64 = 0
+	var median []int64
 
 	// Send requests however many times specified (default 1)
-	for i := 0; i < *profilePtr; i ++ {
+	for i := 0; i < *profilePtr; i++ {
 		// Connects to the address provided  
 		conn, err := net.Dial("tcp", host + ":" + port)	
 		checkError(err)
@@ -70,6 +72,7 @@ func main() {
 
 		var time int64 = time.Since(start).Nanoseconds()
 		mean += time
+		median = append(median, time)
 
 		// Check for minimum and maximum times
 		if (min == 0 || time < min) {
@@ -88,14 +91,27 @@ func main() {
 
 	}
 
+	medianInt := make([]int, len(median))
+	for i, val := range median {
+		medianInt[i] = int(val)
+	  }
+	sort.Ints(medianInt)
+
+	// Calculate median
+	var medianValue int
+	if (*profilePtr % 2 == 1) {
+		medianValue = medianInt[*profilePtr / 2]
+	} else {
+		medianValue = ( medianInt[*profilePtr / 2] + medianInt[(*profilePtr - 1) / 2 ] ) / 2
+	}
+
+
 	// Print Results
 	fmt.Printf("Request Number: %d\n", *profilePtr)
 	fmt.Printf("Fastest Request (µs): %d\n", min)
 	fmt.Printf("Slowest Request (µs): %d\n", max)
 	fmt.Printf("Mean Request Time (µs): %d\n", mean / int64(*profilePtr))
-
-
-
+	fmt.Printf("Median Request Time (µs): %d\n", medianValue)
 
     os.Exit(0)
 
