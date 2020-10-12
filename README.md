@@ -36,4 +36,13 @@ Uses sockets to directly handle an HTTP POST Request, written in Golang.
 - [Google](https://www.google.com:80)
 ![](./images/google.png)
 
+- [Microsoft](https://azure.microsoft.com:80/en-us/services/cdn/
+![](./images/microsoft.png)
+
+- [Fastly](https://www.fastly.com:80)
+![](./images/fastly.png)
+
+- [Example](https://www.example.com:80)
+![](./images/example.png)
+
 Compared to other websites, Cloudflare has a faster response time using this tool. Each website listed above were tested multiple times with this tool and while each test may have differed slightly, the response of Cloudflare has been the best. 
