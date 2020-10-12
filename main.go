@@ -60,6 +60,7 @@ func main() {
 	var mean int64 = 0
 	var median []int64
 	var successes float64 = 0
+	var errorCodes []string
 
 	// Send requests however many times specified (default 1)
 	for i := 0; i < *profilePtr; i++ {
@@ -68,7 +69,7 @@ func main() {
 		checkError(err)
 
 		var start = time.Now()
-		_, err = conn.Write([]byte("POST " + endpoint + " HTTP/1.0\r\nHost: " + host + headers ))
+		_, err = conn.Write([]byte("GET " + endpoint + " HTTP/1.0\r\n" + headers ))
 		checkError(err)
 
 		var time int64 = time.Since(start).Nanoseconds()
@@ -89,13 +90,13 @@ func main() {
 
 		var resultArray []string
 		resultArray = strings.Split(strings.TrimSpace(string(result)), "\n")
-		for i := range resultArray {
-			fmt.Println(strings.TrimSpace(resultArray[i]))
- 
+		for i := range resultArray { 
 			if strings.Contains(resultArray[i], "200 OK") {
 				successes+= 1
+			} else if (strings.Contains(resultArray[i], "HTTP/1.1") && !strings.Contains(resultArray[i], "200 OK")) {
+				var temp string = strings.Split(resultArray[i], "HTTP/1.1")[1]
+				errorCodes = append(errorCodes, strings.TrimSpace(temp))
 			}
-			fmt.Println("\n")
 		}
 	}
 
@@ -121,6 +122,7 @@ func main() {
 	fmt.Printf("Mean Request Time (µs): %d\n", mean / int64(*profilePtr))
 	fmt.Printf("Median Request Time (µs): %d\n", medianValue)
 	fmt.Printf("Percent Successful Requests: %.3f\n", successes / float64(*profilePtr))
+	fmt.Printf("Error Codes: %v\n", errorCodes)
 
     os.Exit(0)
 
