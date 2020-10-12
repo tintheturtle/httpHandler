@@ -8,6 +8,7 @@ import (
 	"net/url"
 	"os"
 	"sort"
+	"strings"
 	"time"
 )
 
@@ -58,6 +59,7 @@ func main() {
 	var max int64 = 0
 	var mean int64 = 0
 	var median []int64
+	var successes float64 = 0
 
 	// Send requests however many times specified (default 1)
 	for i := 0; i < *profilePtr; i++ {
@@ -68,7 +70,6 @@ func main() {
 		var start = time.Now()
 		_, err = conn.Write([]byte("POST " + endpoint + " HTTP/1.0\r\nHost: " + host + headers ))
 		checkError(err)
-		var end = time.Now()
 
 		var time int64 = time.Since(start).Nanoseconds()
 		mean += time
@@ -86,9 +87,16 @@ func main() {
 		result, err := ioutil.ReadAll(conn)
 		checkError(err)
 
-		fmt.Println(string(result[1]))
-		fmt.Println(end.Sub(start))
-
+		var resultArray []string
+		resultArray = strings.Split(strings.TrimSpace(string(result)), "\n")
+		for i := range resultArray {
+			fmt.Println(strings.TrimSpace(resultArray[i]))
+ 
+			if strings.Contains(resultArray[i], "200 OK") {
+				successes+= 1
+			}
+			fmt.Println("\n")
+		}
 	}
 
 	medianInt := make([]int, len(median))
@@ -112,6 +120,7 @@ func main() {
 	fmt.Printf("Slowest Request (µs): %d\n", max)
 	fmt.Printf("Mean Request Time (µs): %d\n", mean / int64(*profilePtr))
 	fmt.Printf("Median Request Time (µs): %d\n", medianValue)
+	fmt.Printf("Percent Successful Requests: %.3f\n", successes / float64(*profilePtr))
 
     os.Exit(0)
 
